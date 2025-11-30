@@ -2,14 +2,15 @@
  * types for AI abstraction layer
  */
 
-export enum OperationType {
-    CONTINUE_PASSAGE = 'continuePassage',
-    // add more
+// messages
+export type MessageRole = 'user' | 'assistant' | 'system';
+export interface Message {
+    role: MessageRole;
+    content: string;
 }
 
-// using gemini for now because of free tier
+// provider config
 export type ProviderType = 'openai' | 'anthropic' | 'gemini';
-
 export interface ProviderConfig {
     type: ProviderType;
     apiKey: string;
@@ -17,37 +18,49 @@ export interface ProviderConfig {
     baseURL?: string;
 }
 
-export interface ModelResult {
-    text: string;
-    index?: number;
-    metadata?: Record<string, any>;
-}
-
-// array of results for alternate generations
-export type ModelResults = ModelResult[];
-
-export interface PromptParameters {
-    // base parameters
+// request options
+export interface CompletionOptions {
     temperature?: number;
     maxTokens?: number;
+    topP?: number;
+    stop?: string[]; // stop sequences
+    n?: number; // # of completions
+    stream?: boolean;
 }
 
-// specific to continue operation
-export interface ContinuePassageParameters extends PromptParameters {
-    text: string;
-    storyContext?: string; // TODO: how to handle story context on passage-level tasks?
+export type FinishReason = 'stop' | 'length' | 'content_filter' | 'error';
+
+// non-streaming response
+export interface Completion {
+    content: string;
+    finishReason: FinishReason;
+}
+export interface CompletionResponse {
+    completions: Completion[]; // n completion choices
+    model: string;
+    usage?: {
+        promptTokens: number;
+        completionTokens: number;
+        totalTokens: number;
+    }
 }
 
-// custom error class for provider-side issues
-export class AIError extends Error {
-    constructor (
+// streaming response
+export interface CompletionChunk {
+    content: string;
+    completionIndex: number;
+    done: boolean;
+    finishReason?: FinishReason;
+}
+
+export class ProviderError extends Error {
+    constructor(
         message: string,
         public provider: ProviderType,
         public statusCode?: number,
-        public originalError?: Error
+        public originalError?: unknown
     ) {
         super(message);
-        this.name = 'AIError';
-        Object.setPrototypeOf(this, AIError.prototype);
+        this.name = 'ProviderError';
     }
 }
