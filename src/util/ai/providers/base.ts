@@ -3,7 +3,6 @@ import {
     ProviderConfig,
     CompletionOptions,
     CompletionResponse,
-    CompletionChunk
 } from "../types";
 
 export abstract class Provider {
@@ -24,9 +23,11 @@ export abstract class Provider {
         options?: CompletionOptions
     ): Promise<CompletionResponse>;
 
+    /* TODO: implement streamed response
     // streaming completion
     abstract stream(
         messages: Message[],
         options?: CompletionOptions
     ): AsyncIterable<CompletionChunk>;
+     */
 }

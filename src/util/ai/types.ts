@@ -28,7 +28,7 @@ export interface CompletionOptions {
     stream?: boolean;
 }
 
-export type FinishReason = 'stop' | 'length' | 'content_filter' | 'error';
+export type FinishReason = 'stop' | 'length' | 'content_filter' | 'error' | 'unknown';
 
 // non-streaming response
 export interface Completion {
@@ -38,11 +38,6 @@ export interface Completion {
 export interface CompletionResponse {
     completions: Completion[]; // n completion choices
     model: string;
-    usage?: {
-        promptTokens: number;
-        completionTokens: number;
-        totalTokens: number;
-    }
 }
 
 // streaming response
