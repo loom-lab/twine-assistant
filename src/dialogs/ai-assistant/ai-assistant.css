@@ -1,0 +1,12 @@
+.ai-assistant {
+	flex-grow: 1;
+	width: 100%;
+}
+
+.maximized .ai-assistant {
+	height: 100%;
+}
+
+.ai-assistant.collapsed {
+	flex-grow: 0;
+}

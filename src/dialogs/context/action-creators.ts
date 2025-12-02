@@ -1,6 +1,7 @@
 import {Thunk} from 'react-hook-thunk-reducer';
 import {DialogsAction, DialogsState} from '../dialogs.types';
 import {PassageEditStack} from '../passage-edit';
+import {AiAssistant} from '../ai-assistant';
 
 /**
  * Adds a passage editor dialog, either creating a new stack for it or adding it
@@ -93,6 +94,46 @@ export function removePassageEditors(
 					passageIds: updatedPassageIds
 				}
 			});
+		}
+	};
+}
+
+/**
+ * Opens the AI assistant dialog for a story.
+ */
+export function openAiAssistant(
+	storyId: string
+): Thunk<DialogsState, DialogsAction> {
+	return (dispatch, state) => {
+		const currentState = state();
+		const aiAssistantIndex = currentState.findIndex(
+			({component}) => component === AiAssistant
+		);
+
+		if (aiAssistantIndex === -1) {
+			dispatch({
+				type: 'addDialog',
+				component: AiAssistant,
+				props: {
+					storyId
+				}
+			});
+		}
+	};
+}
+
+/**
+ * Closes the AI assistant dialog.
+ */
+export function closeAiAssistant(): Thunk<DialogsState, DialogsAction> {
+	return (dispatch, state) => {
+		const currentState = state();
+		const aiAssistantIndex = currentState.findIndex(
+			({component}) => component === AiAssistant
+		);
+
+		if (aiAssistantIndex !== -1) {
+			dispatch({type: 'removeDialog', index: aiAssistantIndex});
 		}
 	};
 }

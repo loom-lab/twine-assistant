@@ -5,6 +5,7 @@ import {AppActions, BuildActions} from '../../../route-actions';
 import {Story} from '../../../store/stories';
 import {Point} from '../../../util/geometry';
 import {PassageActions} from './passage/passage-actions';
+import {AiAssistantButton} from './story/ai-assistant-button';
 import {StoryActions} from './story/story-actions';
 import {UndoRedoButtons} from './undo-redo-buttons';
 import {ZoomButtons} from './zoom-buttons';
@@ -23,6 +24,7 @@ export const StoryEditToolbar: React.FC<StoryEditToolbarProps> = props => {
 		<RouteToolbar
 			pinnedControls={
 				<>
+					<AiAssistantButton story={story} />
 					<ZoomButtons story={story} />
 					<UndoRedoButtons />
 				</>
