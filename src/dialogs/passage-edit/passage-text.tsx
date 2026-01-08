@@ -8,6 +8,7 @@ import {StoryFormat} from '../../store/story-formats';
 import {useCodeMirrorPassageHints} from '../../store/use-codemirror-passage-hints';
 import {useFormatCodeMirrorMode} from '../../store/use-format-codemirror-mode';
 import {codeMirrorOptionsFromPrefs} from '../../util/codemirror-options';
+import {useEditorStateContext} from '../ai-assistant/editor-state-context';
 
 export interface PassageTextProps {
 	disabled?: boolean;
@@ -36,6 +37,39 @@ export const PassageText: React.FC<PassageTextProps> = props => {
 		useFormatCodeMirrorMode(storyFormat.name, storyFormat.version) ?? 'text';
 	const codeAreaContainerRef = React.useRef<HTMLDivElement>(null);
 	const {t} = useTranslation();
+	const {setSelection, setPassageId} = useEditorStateContext();
+	const [cmEditor, setCmEditor] = React.useState<CodeMirror.Editor | null>(null);
+
+	// track selection from codemirror
+	React.useEffect(() => {
+		if (!cmEditor) return;
+
+		const handleCursorActivity = () => {
+			const selection = cmEditor.getSelection();
+			if (selection) {
+				const from = cmEditor.getCursor('from');
+				const to = cmEditor.getCursor('to');
+				setSelection({
+					text: selection,
+					from: {line: from.line, ch: from.ch},
+					to: {line: to.line, ch: to.ch}
+				});
+			} else {
+				setSelection(null);
+			}
+		};
+
+		cmEditor.on('cursorActivity', handleCursorActivity);
+		return () => {
+			cmEditor.off('cursorActivity', handleCursorActivity);
+		};
+	}, [cmEditor, setSelection]);
+
+	// set passage ID
+	React.useEffect(() => {
+		setPassageId(passage.id);
+		return () => setPassageId(null);
+	}, [passage.id, setPassageId]);
 
 	// These are refs so that changing them doesn't trigger a rerender, and more
 	// importantly, no React effects fire.
@@ -110,6 +144,7 @@ export const PassageText: React.FC<PassageTextProps> = props => {
 
 	const handleMount = React.useCallback(
 		(editor: CodeMirror.Editor) => {
+			setCmEditor(editor);
 			onEditorChange(editor);
 
 			// The potential combination of loading a mode and the dialog entrance

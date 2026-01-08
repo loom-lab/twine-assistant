@@ -3,6 +3,7 @@ import {useParams} from 'react-router-dom';
 import {MainContent} from '../../components/container/main-content';
 import {DocumentTitle} from '../../components/document-title/document-title';
 import {DialogsContextProvider} from '../../dialogs';
+import {EditorStateContextProvider} from '../../dialogs/ai-assistant/editor-state-context';
 import {storyWithId} from '../../store/stories';
 import {
 	UndoableStoriesContextProvider,
@@ -78,8 +79,10 @@ export const InnerStoryEditRoute: React.FC = () => {
 
 export const StoryEditRoute: React.FC = () => (
 	<UndoableStoriesContextProvider>
-		<DialogsContextProvider>
-			<InnerStoryEditRoute />
-		</DialogsContextProvider>
+		<EditorStateContextProvider>
+			<DialogsContextProvider>
+				<InnerStoryEditRoute />
+			</DialogsContextProvider>
+		</EditorStateContextProvider>
 	</UndoableStoriesContextProvider>
 );
