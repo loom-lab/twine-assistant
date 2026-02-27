@@ -38,3 +38,13 @@
 	margin: 0;
 	font-style: italic;
 }
+
+.ai-assistant-error {
+	background-color: var(--danger-bg, #fee);
+	border: 1px solid var(--danger-color, #c00);
+	color: var(--danger-color, #c00);
+	padding: calc(var(--grid-size) / 2) var(--grid-size);
+	border-radius: var(--corner-round, 4px);
+	font-size: 0.85rem;
+	margin-bottom: var(--grid-size);
+}

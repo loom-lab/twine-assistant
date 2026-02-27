@@ -37,14 +37,22 @@ export const PassageText: React.FC<PassageTextProps> = props => {
 		useFormatCodeMirrorMode(storyFormat.name, storyFormat.version) ?? 'text';
 	const codeAreaContainerRef = React.useRef<HTMLDivElement>(null);
 	const {t} = useTranslation();
-	const {setSelection, setPassageId} = useEditorStateContext();
+	const {setSelection, setCursorPosition, setPassageId, aiPending} = useEditorStateContext();
 	const [cmEditor, setCmEditor] = React.useState<CodeMirror.Editor | null>(null);
 
-	// track selection from codemirror
+	// Combine disabled prop with aiPending state
+	const isDisabled = disabled || aiPending;
+
+	// track selection and cursor position from codemirror (only for active/non-disabled editor)
 	React.useEffect(() => {
-		if (!cmEditor) return;
+		if (!cmEditor || disabled) return;
 
 		const handleCursorActivity = () => {
+			// Always track cursor position
+			const cursor = cmEditor.getCursor();
+			setCursorPosition({line: cursor.line, ch: cursor.ch});
+
+			// Track selection if there is one
 			const selection = cmEditor.getSelection();
 			if (selection) {
 				const from = cmEditor.getCursor('from');
@@ -63,13 +71,16 @@ export const PassageText: React.FC<PassageTextProps> = props => {
 		return () => {
 			cmEditor.off('cursorActivity', handleCursorActivity);
 		};
-	}, [cmEditor, setSelection]);
+	}, [cmEditor, disabled, setCursorPosition, setSelection]);
 
-	// set passage ID
+	// set passage ID (only for active/non-disabled editor)
 	React.useEffect(() => {
+		if (disabled) return;
+		console.log('Setting passageId:', passage.id);
 		setPassageId(passage.id);
-		return () => setPassageId(null);
-	}, [passage.id, setPassageId]);
+		// Don't clear on unmount - the paired dialogs layout causes remounting
+		// and we want to preserve the passageId during that transition
+	}, [disabled, passage.id, setPassageId]);
 
 	// These are refs so that changing them doesn't trigger a rerender, and more
 	// importantly, no React effects fire.
@@ -185,11 +196,11 @@ export const PassageText: React.FC<PassageTextProps> = props => {
 				prefixes: ['[[', '->']
 			},
 			// This value prevents the area from being focused.
-			readOnly: disabled ? 'nocursor' : false
+			readOnly: isDisabled ? 'nocursor' : false
 		}),
 		[
 			autocompletePassageNames,
-			disabled,
+			isDisabled,
 			mode,
 			prefs,
 			storyFormatExtensionsDisabled,

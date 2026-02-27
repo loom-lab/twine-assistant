@@ -3,7 +3,7 @@
  */
 
 import type { TwineMCPContext, ToolResult } from '../types';
-import { storyWithId, passageWithId, storyStats } from '../../store/stories/getters';
+import { storyWithId, passageWithId, storyStats } from '../../../store/stories/getters';
 
 /**
  * Get overview of current story
@@ -158,4 +158,56 @@ export async function getPassageByName(
 			isStartPassage: passage.id === story.startPassage
 		}
 	};
+}
+
+/**
+ * Find passages that link to a given passage (incoming links / preceding passages)
+ */
+export async function getIncomingLinks(
+	context: TwineMCPContext,
+	targetPassageName: string
+): Promise<ToolResult> {
+	const stories = context.getStories();
+	const story = storyWithId(stories, context.currentStoryId);
+
+	if (!story) {
+		return {
+			success: false,
+			message: `Story not found: ${context.currentStoryId}`
+		};
+	}
+
+	// Regex patterns for Twine links:
+	// [[passage name]] - simple link
+	// [[display text|passage name]] - link with display text
+	// [[display text->passage name]] - alternative syntax
+	const linkPatterns = [
+		new RegExp(`\\[\\[${escapeRegex(targetPassageName)}\\]\\]`, 'g'),
+		new RegExp(`\\[\\[[^\\]|]+\\|${escapeRegex(targetPassageName)}\\]\\]`, 'g'),
+		new RegExp(`\\[\\[[^\\]>]+->${escapeRegex(targetPassageName)}\\]\\]`, 'g')
+	];
+
+	const incomingPassages = story.passages.filter(p => {
+		return linkPatterns.some(pattern => pattern.test(p.text));
+	});
+
+	return {
+		success: true,
+		message: `Found ${incomingPassages.length} passages linking to "${targetPassageName}"`,
+		data: {
+			passages: incomingPassages.map(p => ({
+				id: p.id,
+				name: p.name,
+				text: p.text,
+				tags: p.tags
+			}))
+		}
+	};
+}
+
+/**
+ * Escape special regex characters in a string
+ */
+function escapeRegex(str: string): string {
+	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

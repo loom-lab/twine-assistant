@@ -2,11 +2,22 @@
  * types for AI abstraction layer
  */
 
+import type {ToolDefinition} from '../mcp-server/tool-definitions';
+
 // messages
-export type MessageRole = 'user' | 'assistant' | 'system';
+export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 export interface Message {
     role: MessageRole;
     content: string;
+    toolCallId?: string; // for tool response messages
+    toolCalls?: ToolCall[]; // for assistant messages that invoked tools
+}
+
+// tool calls
+export interface ToolCall {
+    id: string;
+    name: string;
+    arguments: Record<string, unknown>;
 }
 
 // provider config
@@ -24,28 +35,20 @@ export interface CompletionOptions {
     maxTokens?: number;
     topP?: number;
     stop?: string[]; // stop sequences
-    n?: number; // # of completions
-    stream?: boolean;
+    tools?: ToolDefinition[]; // available tools for function calling
 }
 
-export type FinishReason = 'stop' | 'length' | 'content_filter' | 'error' | 'unknown';
+export type FinishReason = 'stop' | 'length' | 'content_filter' | 'tool_calls' | 'error' | 'unknown';
 
 // non-streaming response
 export interface Completion {
     content: string;
+    toolCalls?: ToolCall[];
     finishReason: FinishReason;
 }
 export interface CompletionResponse {
-    completions: Completion[]; // n completion choices
+    completion: Completion;
     model: string;
-}
-
-// streaming response
-export interface CompletionChunk {
-    content: string;
-    completionIndex: number;
-    done: boolean;
-    finishReason?: FinishReason;
 }
 
 export class ProviderError extends Error {

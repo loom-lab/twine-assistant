@@ -3,8 +3,10 @@
  */
 
 import type { TwineMCPContext, ToolResult } from '../types';
-import { storyWithId, passageWithId, passageWithName } from '../../store/stories/getters';
-import { updatePassage, deletePassage } from '../../store/stories/action-creators';
+import type { TextRange, LineChPosition } from '../../text-offsets';
+import { storyWithId, passageWithId, passageWithName } from '../../../store/stories/getters';
+import { updatePassage, deletePassage } from '../../../store/stories/action-creators';
+import { spliceText, insertAtPosition } from '../../text-offsets';
 
 /**
  * create new passage

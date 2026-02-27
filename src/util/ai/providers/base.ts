@@ -17,17 +17,12 @@ export abstract class Provider {
         return this.config.model ?? this.getDefaultModel();
     }
 
-    // non-streaming completion
+    /**
+     * Send messages to the LLM and get a completion.
+     * If tools are provided in options, the LLM may return tool calls
+     */
     abstract complete(
         messages: Message[],
         options?: CompletionOptions
     ): Promise<CompletionResponse>;
-
-    /* TODO: implement streamed response
-    // streaming completion
-    abstract stream(
-        messages: Message[],
-        options?: CompletionOptions
-    ): AsyncIterable<CompletionChunk>;
-     */
 }

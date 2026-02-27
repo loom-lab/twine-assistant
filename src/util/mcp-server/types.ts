@@ -2,7 +2,7 @@
  * MCP server types
  */
 
-import type { Story, Passage } from '../store/stories/stories.types';
+import type { Story, Passage } from '../../store/stories/stories.types';
 
 /**
  * exposing current editing context
